@@ -32,7 +32,7 @@ namespace TKExtract
                 {
                     if (sheet.TeamPlayed(name))
                         sb.Append(sheet[name].Total);
-                    else sb.Append("0");
+                    else sb.Append("-");
 
                     sb.Append(' ');
                 }
