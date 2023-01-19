@@ -8,6 +8,8 @@
         public readonly int Wager6;
         public readonly int Wager9;
 
+        public int Total => Round1 + Round2 + Wager3 + Wager6 + Wager9;
+
         public ScorePeriod(int round1, int round2, int wager3, int wager6, int wager9)
         {
             Round1 = round1;
@@ -21,5 +23,6 @@
         {
             return $"{Round1} {Round2} {Wager3} {Wager6} {Wager9}";
         }
+
     }
 }

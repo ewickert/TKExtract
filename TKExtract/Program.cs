@@ -43,10 +43,13 @@ namespace TKExtract
                 eDate = FindLastWednesday(eDate);
                 var cDate = sDate;
 
+                SummaryGenerator g = new SummaryGenerator();
                 do
                 {
                     var dl = new ScoreDownloader(venue.Value(), cDate);
                     var sheet = new ScoreParser(dl.Download().Result).Parse();
+                    sheet.DatePlayed = cDate;
+                    g.AddSheet(sheet);
                     if (string.IsNullOrWhiteSpace(output.Value()))
                     {
                         Console.Write(sheet.ToString());
@@ -54,11 +57,15 @@ namespace TKExtract
                     }
                     else
                     {
+                        Directory.CreateDirectory(Path.GetDirectoryName(output.Value()));
                         File.AppendAllText(string.Format(output.Value(), cDate), sheet.ToString());
+                        Console.WriteLine($"Wrote {string.Format(output.Value(), cDate)}");
                     }
                     cDate = cDate.AddDays(7);
                 }
                 while (cDate <= eDate);
+                File.WriteAllText(Path.GetDirectoryName(output.Value()) + "/ScoreSummary.csv", g.GenerateScoreSummary());
+                File.WriteAllText(Path.GetDirectoryName(output.Value()) + "/PlaceSummary.csv", g.GeneratePlaceSummary());
             });
 
             app.Execute(args);

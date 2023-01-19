@@ -15,7 +15,17 @@ namespace TKExtract
 
         public ScoreSheet Parse()
         {
-            var hostName = this.ScorePage.QuerySelector(".title-small").Text().Split().Last();
+            var hostName = "NO GAME";
+            DateTimeOffset GameDate = DateTimeOffset.Now;
+            try
+            {
+
+                hostName = this.ScorePage.QuerySelector(".title-small").Text().Split().Last();
+            }
+            catch (Exception e)
+            {
+
+            }
             var sheet = new ScoreSheet(hostName);
             var rows = this.ScorePage.QuerySelectorAll(".table-row-data");
             foreach (var row in rows)
@@ -23,6 +33,8 @@ namespace TKExtract
                 var offset = 1;
 
                 var cells = row.QuerySelectorAll("td");
+                var ordinal = cells[0].Text();
+                var place = int.Parse(ordinal.Substring(0, ordinal.Length - 2));
                 var teamName = cells[offset++].Text();
                 offset++;
                 List<ScorePeriod> periods = new List<ScorePeriod>();
@@ -38,7 +50,7 @@ namespace TKExtract
                 }
                 var finalWager = int.Parse(cells[offset++].Text());
 
-                var r = new ScoreRow(teamName, finalWager, periods);
+                var r = new ScoreRow(teamName, finalWager, periods, place);
                 sheet.AddRow(r);
             }
             return sheet;

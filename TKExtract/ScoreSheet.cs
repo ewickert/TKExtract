@@ -1,30 +1,50 @@
-﻿using System.Text;
+﻿using System.Collections;
+using System.Text;
 
 namespace TKExtract
 {
-    internal class ScoreSheet
+    internal class ScoreSheet : IEnumerable<ScoreRow>
     {
-        public readonly string HostName;
-        private List<ScoreRow> Rows = new List<ScoreRow>();
+        public readonly string HostName = "";
+        private readonly Dictionary<string, ScoreRow> Rows = new Dictionary<string, ScoreRow>();
+        public ScoreRow this[string s] => this.Rows[s];
+        public IEnumerable<string> Teams => this.Rows.Keys;
+        public DateTimeOffset DatePlayed { get; set; }
 
         public ScoreSheet(string host)
         {
             this.HostName = host;
         }
 
+
         public void AddRow(ScoreRow r)
         {
-            this.Rows.Add(r);
+            this.Rows.Add(r.TeamName, r);
         }
+        public bool TeamPlayed(string teamName)
+        {
+            return this.Rows.ContainsKey(teamName);
+        }
+
+        public IEnumerator<ScoreRow> GetEnumerator()
+        {
+            return ((IEnumerable<ScoreRow>)Rows.Values).GetEnumerator();
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine(this.HostName);
-            foreach (var row in Rows)
+            //sb.AppendLine(this.HostName);
+            foreach (var row in Rows.Values)
             {
-                sb.AppendLine(row.ToString());
+                sb.AppendLine($"{this.DatePlayed.ToString("yyyy-MM-dd")} {this.HostName} {row.ToString()}");
             }
             return sb.ToString();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)Rows.Values).GetEnumerator();
         }
     }
 }
