@@ -35,7 +35,7 @@ namespace TKExtract
                 var cells = row.QuerySelectorAll("td");
                 var ordinal = cells[0].Text();
                 var place = int.Parse(ordinal.Substring(0, ordinal.Length - 2));
-                var teamName = cells[offset++].Text();
+                var teamName = cells[offset++].Text().Replace("\"", "'");
                 offset++;
                 List<ScorePeriod> periods = new List<ScorePeriod>();
                 for (int x = 0; x < 3; x++)
