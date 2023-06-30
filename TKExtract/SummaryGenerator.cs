@@ -62,5 +62,37 @@ namespace TKExtract
             }
             return sb.ToString();
         }
+
+        public string GenerateRoundDetail()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("DATE ");
+            sb.Append("ROUND ");
+            foreach (var team in TeamNames)
+            {
+                sb.Append($"{team.Replace(' ', '_')} ");
+            }
+            sb.AppendLine();
+            foreach (var sheet in Sheets)
+            {
+                for (int x = 0; x < 15; x++)
+                {
+                    sb.Append($"{sheet.DatePlayed.ToString("yyyy-MM-dd")} {x + 1} ");
+                    foreach (var team in TeamNames)
+                    {
+                        if (sheet.TeamPlayed(team))
+                        {
+                            var row = sheet[team];
+                            sb.Append($"{row[x]} ");
+                        }
+                        else
+                            sb.Append("- ");
+                    }
+                    sb.AppendLine();
+                }
+            }
+            return sb.ToString();
+        }
+
     }
 }

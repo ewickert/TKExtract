@@ -38,37 +38,66 @@ namespace TKExtract
                     app.ShowHelp();
                     Environment.Exit(2);
                 }
+                IEnumerable<string> venues = new List<string>() { DEFAULTVENUE };
+                if (venue.Value() == "ALL")
+                {
+                    var vd = new VenueDownloader();
+                    var d = vd.Download().Result;
+                    venues = new VenueParser(d).Parse();
+                }
+
 
                 sDate = FindLastWednesday(sDate);
                 eDate = FindLastWednesday(eDate);
-                var cDate = sDate;
-
-                SummaryGenerator g = new SummaryGenerator();
-                do
-                {
-                    var dl = new ScoreDownloader(venue.Value(), cDate);
-                    var sheet = new ScoreParser(dl.Download().Result).Parse();
-                    sheet.DatePlayed = cDate;
-                    g.AddSheet(sheet);
-                    if (string.IsNullOrWhiteSpace(output.Value()))
-                    {
-                        Console.Write(sheet.ToString());
-                        Console.WriteLine();
-                    }
-                    else
-                    {
-                        Directory.CreateDirectory(Path.GetDirectoryName(output.Value()));
-                        File.AppendAllText(string.Format(output.Value(), cDate), sheet.ToString());
-                        Console.WriteLine($"Wrote {string.Format(output.Value(), cDate)}");
-                    }
-                    cDate = cDate.AddDays(7);
-                }
-                while (cDate <= eDate);
-                File.WriteAllText(Path.GetDirectoryName(output.Value()) + "/ScoreSummary.csv", g.GenerateScoreSummary());
-                File.WriteAllText(Path.GetDirectoryName(output.Value()) + "/PlaceSummary.csv", g.GeneratePlaceSummary());
+                Parallel.ForEach(venues, v => { ProcessVenue(v, sDate, eDate); });
+                //foreach (var venue in venues)
+                //{
+                //    ProcessVenue(venue, sDate, eDate);
+                //}
+                //do
+                //{
+                //    var dl = new ScoreDownloader(venue.Value(), cDate);
+                //    var sheet = new ScoreParser(dl.Download().Result).Parse();
+                //    sheet.DatePlayed = cDate;
+                //    g.AddSheet(sheet);
+                //    if (string.IsNullOrWhiteSpace(output.Value()))
+                //    {
+                //        Console.Write(sheet.ToString());
+                //        Console.WriteLine();
+                //    }
+                //    else
+                //    {
+                //        Directory.CreateDirectory(Path.GetDirectoryName(output.Value()));
+                //        File.AppendAllText(string.Format(output.Value(), cDate), sheet.ToString());
+                //        Console.WriteLine($"Wrote {string.Format(output.Value(), cDate)}");
+                //    }
+                //    cDate = cDate.AddDays(7);
+                //}
+                //while (cDate <= eDate);
             });
 
             app.Execute(args);
+        }
+
+        static void ProcessVenue(string venue, DateTimeOffset start, DateTimeOffset end)
+        {
+
+            var cDate = start;
+            do
+            {
+                var dl = new ScoreDownloader(venue, cDate);
+                var sheet = new ScoreParser(dl.Download().Result).Parse();
+                if (sheet.Count() == 0)
+                {
+                    cDate = cDate.AddDays(7);
+                    continue;
+                }
+                sheet.Venue = venue;
+                sheet.DatePlayed = cDate;
+                Console.Write(sheet.ToString());
+                cDate = cDate.AddDays(7);
+            }
+            while (cDate <= end);
         }
 
         static DateTimeOffset FindLastWednesday(DateTimeOffset MaybeWednesday)

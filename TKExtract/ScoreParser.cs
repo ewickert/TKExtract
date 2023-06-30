@@ -12,21 +12,12 @@ namespace TKExtract
             this.ScorePage = scorePage;
         }
 
-
         public ScoreSheet Parse()
         {
             var hostName = "NO GAME";
-            DateTimeOffset GameDate = DateTimeOffset.Now;
-            try
-            {
-
-                hostName = this.ScorePage.QuerySelector(".title-small").Text().Split().Last();
-            }
-            catch (Exception e)
-            {
-
-            }
-            var sheet = new ScoreSheet(hostName);
+            var venue = "NO VENUE";
+            hostName = this.ScorePage.QuerySelector(".title-small")?.Text().Split().Last() ?? hostName;
+            var sheet = new ScoreSheet(hostName, venue);
             var rows = this.ScorePage.QuerySelectorAll(".table-row-data");
             foreach (var row in rows)
             {
