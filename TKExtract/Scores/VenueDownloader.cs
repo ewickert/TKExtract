@@ -7,7 +7,7 @@ namespace TKExtract
     {
         private const string BASEURL = "https://triviakings.com/include/js/getShortNameJS.php";
 
-        private string URL => BASEURL;
+        private string _url => BASEURL;
 
         public VenueDownloader()
         {
@@ -18,7 +18,7 @@ namespace TKExtract
             //https://triviakings.com/ajax/scores.php?shortName=pjskidoos&gameDate=2022-08-17
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
-            var doc = await context.OpenAsync(this.URL);
+            var doc = await context.OpenAsync(_url);
             return doc;
         }
     }

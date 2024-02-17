@@ -4,15 +4,15 @@ namespace TKExtract
 {
     internal class SummaryGenerator
     {
-        private readonly List<ScoreSheet> Sheets = new List<ScoreSheet>();
+        private readonly List<ScoreSheet> _sheets = new List<ScoreSheet>();
 
-        private List<string> TeamNames = new List<string>();
+        private List<string> _teamNames = new List<string>();
         public void AddSheet(ScoreSheet s)
         {
-            this.Sheets.Add(s);
+            _sheets.Add(s);
             foreach (var name in s.Teams)
             {
-                if (!this.TeamNames.Contains(name)) this.TeamNames.Add(name);
+                if (!_teamNames.Contains(name)) _teamNames.Add(name);
             }
         }
 
@@ -20,15 +20,15 @@ namespace TKExtract
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("DATE ");
-            foreach (var team in TeamNames)
+            foreach (var team in _teamNames)
             {
                 sb.Append(team.Replace(' ', '_') + " ");
             }
-            foreach (var sheet in Sheets)
+            foreach (var sheet in _sheets)
             {
                 sb.AppendLine();
                 sb.Append(sheet.DatePlayed.ToString("yyyy-MM-dd") + " ");
-                foreach (var name in TeamNames)
+                foreach (var name in _teamNames)
                 {
                     if (sheet.TeamPlayed(name))
                         sb.Append(sheet[name].Total);
@@ -43,15 +43,15 @@ namespace TKExtract
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("DATE ");
-            foreach (var team in TeamNames)
+            foreach (var team in _teamNames)
             {
                 sb.Append(team.Replace(' ', '_') + " ");
             }
-            foreach (var sheet in Sheets)
+            foreach (var sheet in _sheets)
             {
                 sb.AppendLine();
                 sb.Append(sheet.DatePlayed.ToString("yyyy-MM-dd") + " ");
-                foreach (var name in TeamNames)
+                foreach (var name in _teamNames)
                 {
                     if (sheet.TeamPlayed(name))
                         sb.Append(sheet[name].Place);
@@ -68,17 +68,17 @@ namespace TKExtract
             StringBuilder sb = new StringBuilder();
             sb.Append("DATE ");
             sb.Append("ROUND ");
-            foreach (var team in TeamNames)
+            foreach (var team in _teamNames)
             {
                 sb.Append($"{team.Replace(' ', '_')} ");
             }
             sb.AppendLine();
-            foreach (var sheet in Sheets)
+            foreach (var sheet in _sheets)
             {
                 for (int x = 0; x < 15; x++)
                 {
                     sb.Append($"{sheet.DatePlayed.ToString("yyyy-MM-dd")} {x + 1} ");
-                    foreach (var team in TeamNames)
+                    foreach (var team in _teamNames)
                     {
                         if (sheet.TeamPlayed(team))
                         {

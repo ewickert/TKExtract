@@ -5,48 +5,48 @@ namespace TKExtract
 {
     internal class ScoreSheet : IEnumerable<ScoreRow>
     {
+        private readonly Dictionary<string, ScoreRow> _rows = new Dictionary<string, ScoreRow>();
         public readonly string HostName = "";
         public string Venue { get; set; }
-        private readonly Dictionary<string, ScoreRow> Rows = new Dictionary<string, ScoreRow>();
-        public ScoreRow this[string s] => this.Rows[s];
-        public IEnumerable<string> Teams => this.Rows.Keys;
+        public ScoreRow this[string s] => _rows[s];
+        public IEnumerable<string> Teams => _rows.Keys;
         public DateTimeOffset DatePlayed { get; set; }
 
         public ScoreSheet(string host, string venue)
         {
-            this.HostName = host;
-            this.Venue = venue;
+            HostName = host;
+            Venue = venue;
         }
 
 
         public void AddRow(ScoreRow r)
         {
-            this.Rows.Add(r.TeamName, r);
+            _rows.Add(r.TeamName, r);
         }
         public bool TeamPlayed(string teamName)
         {
-            return this.Rows.ContainsKey(teamName);
+            return _rows.ContainsKey(teamName);
         }
 
         public IEnumerator<ScoreRow> GetEnumerator()
         {
-            return ((IEnumerable<ScoreRow>)Rows.Values).GetEnumerator();
+            return ((IEnumerable<ScoreRow>)_rows.Values).GetEnumerator();
         }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
-            //sb.AppendLine(this.HostName);
-            foreach (var row in Rows.Values)
+            //sb.AppendLine(HostName);
+            foreach (var row in _rows.Values)
             {
-                sb.AppendLine($"{this.DatePlayed.ToString("yyyy-MM-dd")} {this.Venue} {this.HostName} {row.ToString()}");
+                sb.AppendLine($"{DatePlayed.ToString("yyyy-MM-dd")} {Venue} {HostName} {row.ToString()}");
             }
             return sb.ToString();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)Rows.Values).GetEnumerator();
+            return ((IEnumerable)_rows.Values).GetEnumerator();
         }
     }
 }

@@ -4,21 +4,21 @@ namespace TKExtract
 {
     internal class ScoreParser
     {
-        private IDocument ScorePage;
+        private IDocument _scorePage;
 
 
         public ScoreParser(IDocument scorePage)
         {
-            this.ScorePage = scorePage;
+            _scorePage = scorePage;
         }
 
         public ScoreSheet Parse()
         {
             var hostName = "NO GAME";
             var venue = "NO VENUE";
-            hostName = this.ScorePage.QuerySelector(".title-small")?.Text().Split().Last() ?? hostName;
+            hostName = _scorePage.QuerySelector(".title-small")?.Text().Split().Last() ?? hostName;
             var sheet = new ScoreSheet(hostName, venue);
-            var rows = this.ScorePage.QuerySelectorAll(".table-row-data");
+            var rows = _scorePage.QuerySelectorAll(".table-row-data");
             foreach (var row in rows)
             {
                 var offset = 1;
