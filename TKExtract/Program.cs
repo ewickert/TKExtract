@@ -1,88 +1,31 @@
-﻿using McMaster.Extensions.CommandLineUtils;
+﻿using CommandDotNet;
+using CommandDotNet.NameCasing;
+using CommandDotNet.Spectre;
+using Spectre.Console;
 
 namespace TKExtract
 {
-    internal class Program
+    public class Program
     {
         private const string DEFAULTVENUE = "pjskidoos";
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
+            return new AppRunner<Program>()
+                 .UseNameCasing(Case.LowerCase)
+                 .UseSpectreAnsiConsole()
+                 .Run(args);
 
-            var defaultDate = FindLastWednesday(DateTimeOffset.Now);
-
-            var app = new CommandLineApplication();
-            app.HelpOption("-h|-?|--help");
-            var venue = app.Option("-v|--venue <venue>", "Venue for which to search results", CommandOptionType.SingleValue);
-            venue.DefaultValue = DEFAULTVENUE;
-
-            var startDate = app.Option("-s|--start <date>", "Date to search from", CommandOptionType.SingleValue);
-            startDate.DefaultValue = defaultDate.ToString("yyyy-MM-dd");
-
-
-            var endDate = app.Option("-e|--end <date>", "Date to search to", CommandOptionType.SingleValue);
-            endDate.DefaultValue = defaultDate.ToString("yyyy-MM-dd");
-
-            var output = app.Option("-o|--output", "Pattern for output files", CommandOptionType.SingleValue);
-            output.DefaultValue = String.Empty;
-
-
-            app.OnExecute(() =>
-            {
-                if (!DateTimeOffset.TryParse(startDate.Value(), out var sDate))
-                {
-                    app.ShowHelp();
-                    Environment.Exit(1);
-                }
-                if (!DateTimeOffset.TryParse(endDate.Value(), out var eDate))
-                {
-                    app.ShowHelp();
-                    Environment.Exit(2);
-                }
-                IEnumerable<string> venues = new List<string>() { DEFAULTVENUE };
-                if (venue.Value() == "ALL")
-                {
-                    var vd = new VenueDownloader();
-                    var d = vd.Download().Result;
-                    venues = new VenueParser(d).Parse();
-                }
-
-
-                sDate = FindLastWednesday(sDate);
-                eDate = FindLastWednesday(eDate);
-                Parallel.ForEach(venues, v => { ProcessVenue(v, sDate, eDate); });
-                //foreach (var venue in venues)
-                //{
-                //    ProcessVenue(venue, sDate, eDate);
-                //}
-                //do
-                //{
-                //    var dl = new ScoreDownloader(venue.Value(), cDate);
-                //    var sheet = new ScoreParser(dl.Download().Result).Parse();
-                //    sheet.DatePlayed = cDate;
-                //    g.AddSheet(sheet);
-                //    if (string.IsNullOrWhiteSpace(output.Value()))
-                //    {
-                //        Console.Write(sheet.ToString());
-                //        Console.WriteLine();
-                //    }
-                //    else
-                //    {
-                //        Directory.CreateDirectory(Path.GetDirectoryName(output.Value()));
-                //        File.AppendAllText(string.Format(output.Value(), cDate), sheet.ToString());
-                //        Console.WriteLine($"Wrote {string.Format(output.Value(), cDate)}");
-                //    }
-                //    cDate = cDate.AddDays(7);
-                //}
-                //while (cDate <= eDate);
-            });
-
-            app.Execute(args);
         }
 
-        static void ProcessVenue(string venue, DateTimeOffset start, DateTimeOffset end)
+        [Command(Description = "Extract scores from TriviaKings")]
+        public void Scores(IAnsiConsole stdOut, string? venue, DateTimeOffset? start, DateTimeOffset? end)
         {
 
-            var cDate = start;
+            venue ??= DEFAULTVENUE;
+            var cDate = start ?? DateTimeOffset.Now;
+            var eDate = end ?? DateTimeOffset.Now;
+            cDate = FindLastWednesday(cDate);
+            eDate = FindLastWednesday(eDate);
             do
             {
                 var dl = new ScoreDownloader(venue, cDate);
@@ -94,10 +37,25 @@ namespace TKExtract
                 }
                 sheet.Venue = venue;
                 sheet.DatePlayed = cDate;
-                Console.Write(sheet.ToString());
+                stdOut.Write(sheet.ToString());
                 cDate = cDate.AddDays(7);
             }
-            while (cDate <= end);
+            while (cDate <= eDate);
+        }
+
+        [Command(Description = "Extract events from TriviaKings")]
+        public void Calendar(IAnsiConsole stdOut, DateTimeOffset? start, DateTimeOffset? end, string? venue)
+        {
+            var cDate = start ?? DateTimeOffset.Now;
+            var eDate = end ?? DateTimeOffset.Now.AddDays(7);
+            var cal = new Calendar(cDate, eDate);
+            var events = cal.GetEvents().Result;
+            foreach (var e in events)
+            {
+                if (venue is not null && e.ShortName != venue)
+                    continue;
+                stdOut.WriteLine(e.ToString());
+            }
         }
 
         static DateTimeOffset FindLastWednesday(DateTimeOffset MaybeWednesday)

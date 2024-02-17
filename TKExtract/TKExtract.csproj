@@ -9,7 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.17.1" />
+    <PackageReference Include="commanddotnet" Version="7.0.3" />
+    <PackageReference Include="commanddotnet.namecasing" Version="4.0.2" />
+    <PackageReference Include="commanddotnet.spectre" Version="3.0.2" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.1" />
+    <PackageReference Include="newtonsoft.json" Version="13.0.3" />
+    <PackageReference Include="spectre.console" Version="0.48.0" />
   </ItemGroup>
 
 </Project>
